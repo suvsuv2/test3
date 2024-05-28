@@ -1,0 +1,175 @@
+   public ParticipantWindow(string enteredID)
+   {
+       InitializeComponent();
+       using (var context = new MaincontextM())
+       {
+           int id = int.Parse(enteredID);
+           Participant participant = context.ParticipantZ.FirstOrDefault(v => v.ID == id);
+           if (participant != null)
+           {
+               // Заполнение элементов данными из объекта Organizer
+
+               image.Source = new BitmapImage(new Uri(participant.Photo));
+               listBox.ItemsSource = new List<string>
+           {
+               $"ID: {participant.ID}",
+               $"ФИО: {participant.FIO}",
+               $"Gender: {participant.Gender}",
+               $"Mail: {participant.Mail}",
+               $"Дата рождения: {participant.BirthdayData}",
+               $"Страна: {participant.Country}",
+               $"Номер телефона: {participant.TelephoneNumber}",
+               $"Ваш пароль: {participant.Password}",
+
+           };
+           }
+
+       }
+   }
+
+    private int incorrectAttempts = 0;
+
+    private void Button_Click(object sender, RoutedEventArgs e)
+    {
+
+        int enteredID = int.Parse(textBox_ID.Text);
+        string enteredPassword = passwordBox.Text;
+
+        using (var context = new MaincontextM()) 
+        {
+            Shuri shuri = context.ShuriZ.FirstOrDefault(s => s.ID == enteredID && s.Password == enteredPassword);
+            Participant participant = context.ParticipantZ.FirstOrDefault(z => z.ID == enteredID && z.Password == enteredPassword);
+            Organizer organizer = context.OrganizerZ.FirstOrDefault(v => v.ID == enteredID && v.Password == enteredPassword);
+            Moderator moderator = context.ModeratorZ.FirstOrDefault(o => o.ID == enteredID &&  o.Password == enteredPassword);
+          
+            if (shuri != null)
+            {
+                ShuriWindow shuriWindow = new ShuriWindow();
+                shuriWindow.Show();
+                Close();
+                return;
+            }
+            if (participant != null)
+            {
+                ParticipantWindow participantWindow = new ParticipantWindow(enteredID.ToString());
+                participantWindow.Show();
+                Close();
+                return;
+            }
+            if (organizer != null)
+            {
+                Organizator orga = new Organizator(enteredID.ToString());
+                orga.Show();
+                Close();
+                return;
+            }
+            if (moderator != null)
+            {
+                ModeratorWindow moderatorWindow = new ModeratorWindow(/*enteredID.ToString()*/);
+                moderatorWindow.Show();
+                Close();
+                return;
+            }
+            //if (shuri == null || participant == null || organizer == null || moderator == null)
+            //{
+            //    MessageBox.Show("Пустое окно.");
+            //}
+
+            else
+            {
+                MessageBox.Show("Неверный ID или пароль.");
+            }
+            incorrectAttempts++;
+            if (incorrectAttempts >= 3)
+            {
+                incorrectAttempts = 0;
+               
+                textBox_ID.IsEnabled = false;
+                passwordBox.IsEnabled = false;
+                abno.IsEnabled= false;
+
+             
+                MessageBox.Show("Слишком много запросов, 10 секунд timeout");
+
+              
+                Timer timer = new Timer(10000);
+                timer.Elapsed += Timer_Elapsed;
+                timer.AutoReset = false;
+                timer.Enabled = true;
+
+                return;
+            }
+
+        }
+
+    }
+    private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+    {
+       
+        Dispatcher.Invoke(() =>
+        {
+            textBox_ID.IsEnabled = true;
+            passwordBox.IsEnabled = true;
+            abno.IsEnabled = true;
+        });
+    }
+
+
+    public Organizator(string enteredID)
+    {
+        InitializeComponent();
+        DispatcherTimer timer = new DispatcherTimer();
+        timer.Interval = TimeSpan.FromMinutes(1);
+        timer.Tick += LabelGoodMorning_LayoutUpdated;
+        timer.Start();
+        //organizerID = enteredID;
+        using (var context = new MaincontextM())
+        {
+            int id = int.Parse(enteredID);
+            Organizer organizer = context.OrganizerZ.FirstOrDefault(v => v.ID == id);
+
+            if (organizer != null)
+            {
+
+                if (organizer.Gender == "мужской" || organizer.Gender =="Мужской")
+                {
+                    label_FIO.Content = $"Ms {organizer.FIO}";
+                }
+                else if (organizer.Gender == "женский" || organizer.Gender == "Женский")
+                {
+                    label_FIO.Content = $"Mrs {organizer.FIO}";
+                }
+                image.Source = new BitmapImage(new Uri(organizer.Photo));
+                listBox.ItemsSource = new List<string>
+            {
+                //$"Gender: {organizer.Gender}",
+                $"Mail: {organizer.Mail}",
+                $"Birthday Date: {organizer.BirthdayData}",
+                $"Country: {organizer.Country}",
+                $"Telephone Number: {organizer.TelephoneNumber}",
+                //$"Profession: {organizer.Profession}",
+                //$"Event: {organizer.Event}"
+            };
+            }
+        }
+    }
+
+
+   private void LabelGoodMorning_LayoutUpdated(object sender, EventArgs e)
+   {
+       DateTime now = DateTime.Now;
+       int hour = now.Hour;
+
+       if (hour >= 5 && hour < 12)
+       {
+           LabelGoodMorning.Content = "Доброе утро!";
+       }
+       else if (hour >= 12 && hour < 17)
+       {
+           LabelGoodMorning.Content = "Добрый день!";
+       }
+       else
+       {
+           LabelGoodMorning.Content = "Добрый вечер!";
+       }
+   }
