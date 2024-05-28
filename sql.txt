@@ -1,0 +1,14 @@
+use finalcr
+create table moderator (
+ID INT PRIMARY KEY NOT NULL,
+FIO VARCHAR(100),
+Gender VARCHAR(7),
+Mail varchar(100),
+BirthdayData date,
+Country varchar(100),
+TelephoneNumber varchar(100),
+Profession varchar(100),
+Event varchar(100),
+Password varchar(100),
+Photo varchar(100)
+);
