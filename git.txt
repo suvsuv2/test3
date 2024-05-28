@@ -1,0 +1,124 @@
+private void Button_Click(object sender, RoutedEventArgs e)
+{
+    string enteredFIO = FIObox.Text;
+    string enteredPassword = Passwordboxz.Text;
+
+    using (var context = new MainContext()) 
+    {
+        moderator moderator = context.moderatorZ.FirstOrDefault(s => s.FIO == enteredFIO && s.Password == enteredPassword);
+        if (moderator != null) 
+        {
+            MainWindow z = new MainWindow();
+            z.ShowDialog();
+            return;
+        }
+        else
+        {
+            MessageBox.Show("Неверное ФИО или пароль.");
+        }
+    }
+}
+
+
+ private void Button_Click(object sender, RoutedEventArgs e)
+ {
+     int enteredID = int.Parse(IDbox.Text);
+     using (var context = new MainContext())
+     {
+         try 
+         {
+             moderator moderator = context.moderatorZ.FirstOrDefault(z => z.ID == enteredID);
+
+             if (moderator != null)
+             {
+                 moderator.FIO = FIObox.Text;
+                 moderator.Gender = ComboGender.Text;
+                 moderator.BirthdayData = DatePick.SelectedDate;
+                 context.SaveChanges();
+                 MessageBox.Show("Успешно изменено!");
+             }
+             else
+             {
+                 MessageBox.Show("Участник с указанным ID не найден.");
+             }
+         }
+
+         catch (Exception ex) 
+         {
+             MessageBox.Show("Ошибка изменения данных,проверьте данные!" + ex.Message , "Ошибка" , MessageBoxButton.OK, MessageBoxImage.Error);
+         }
+     }    
+ }
+
+  private void Button_Click_1(object sender, RoutedEventArgs e)
+  {
+    if(InputList.SelectedItems.Count > 0) 
+      {
+          List<moderator> selectedItems = new List<moderator>();
+          foreach (var item in InputList.SelectedItems)
+          {
+              selectedItems.Add((moderator)item);
+          }
+          foreach(var item in selectedItems)
+          {
+              moderatorList.Remove(item);
+              context.moderatorZ.Remove(item);
+          }
+          context.SaveChanges();
+          InputList.ItemsSource = null;
+          InputList.ItemsSource = moderatorList;
+      }
+
+
+  }
+
+
+
+   private void Button_Click(object sender, RoutedEventArgs e)
+   {
+       using (var context = new MainContext())
+       {
+           try
+           {
+               var maxId = context.moderatorZ.Max(x => (int?)x.ID) ?? 0;
+               var newModer = new moderator();
+               newModer.ID = maxId + 1;
+               newModer.FIO = FIOBox.Text;
+               newModer.Gender = GenderComboBox.Text;
+               newModer.Mail = MailBox.Text;
+               //newModer.Mail = int.Parse(MailBox.Text); для данных с int
+               if (DatePicker.SelectedDate.HasValue)
+                   newModer.BirthdayData = DatePicker.SelectedDate.Value;
+               context.moderatorZ.Add(newModer);
+               context.SaveChanges();
+               this.Close();
+               MessageBox.Show("Успешно добавлено!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+           }
+           catch (Exception ex)
+           {
+               MessageBox.Show("Ошибка добавления данных" + ex.Message, "ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+           }
+       }
+
+   }
+
+
+
+
+  public ObservableCollection<object> items { get; set; }
+
+  public static MainContext context = new MainContext();
+
+  public ObservableCollection<moderator> moderators { get; set; }
+
+  public List<moderator> moderatorList { get; set; }
+
+
+  public MainWindow()
+  {
+      InitializeComponent();
+     moderatorList = context.moderatorZ.ToList();
+      moderators = new ObservableCollection<moderator>();
+      InputList.ItemsSource = moderatorList;
+      
+  }
